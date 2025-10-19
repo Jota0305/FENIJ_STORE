@@ -1,17 +1,31 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
+import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
+
 function App() {
+  const { isAuthenticated } = useAuth();
+
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-black mb-6">
-          Sistema de Ventas - FENIJ STORE
-        </h1>
-        <img 
-          src="/FENIJ LOGO.png" 
-          alt="FENIJ STORE Logo" 
-          className="w-33 h-33 mx-auto"
-        />
-      </div>
-    </div>
+    <Routes>
+      {/* Ruta de Login */}
+      <Route 
+        path="/login" 
+        element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 
+      />
+      
+      {/* Ruta de Dashboard (protegida) */}
+      <Route 
+        path="/dashboard" 
+        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
+      />
+      
+      {/* Ruta por defecto - redirige al login */}
+      <Route 
+        path="*" 
+        element={<Navigate to="/login" />} 
+      />
+    </Routes>
   )
 }
 
