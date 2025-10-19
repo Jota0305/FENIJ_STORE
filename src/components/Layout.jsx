@@ -11,11 +11,12 @@ import {
   X,
   Home,
   User,
-  DollarSign
+  DollarSign,
+  Users
 } from 'lucide-react';
 
 function Layout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Cambié a false por defecto para móviles
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -24,28 +25,27 @@ function Layout({ children }) {
     navigate('/login');
   };
 
-  // Cerrar sidebar al hacer clic en un link (para móviles)
   const handleLinkClick = () => {
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
   };
 
-  // Enlaces del menú
-// Enlaces del menú
-const menuItems = [
-  { path: '/dashboard', icon: Home, label: 'Dashboard' },
-  { path: '/products', icon: Package, label: 'Productos' },
-  { path: '/sales', icon: ShoppingCart, label: 'Ventas' },
-  { path: '/cashier', icon: DollarSign, label: 'Caja' },
-  { path: '/reports', icon: BarChart3, label: 'Reportes' }
-];
+  const menuItems = [
+    { path: '/dashboard', icon: Home, label: 'Dashboard' },
+    { path: '/products', icon: Package, label: 'Productos' },
+    { path: '/customers', icon: Users, label: 'Clientes' },
+    { path: '/sales', icon: ShoppingCart, label: 'Ventas' },
+    { path: '/cashier', icon: DollarSign, label: 'Caja' },
+    { path: '/reports', icon: BarChart3, label: 'Reportes' }
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Navbar superior */}
-      <nav className="bg-white shadow-lg fixed w-full z-30">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+    <div className="min-h-screen bg-gray-100 mt-10">
+      {/* Navbar superior - FIJO */}
+      <nav className="bg-white shadow-lg fixed top-0 w-full z-30 h-16">
+        <div className="px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex justify-between items-center h-full">
             {/* Logo y botón de menú */}
             <div className="flex items-center space-x-2 sm:space-x-4">
               <button
@@ -84,16 +84,16 @@ const menuItems = [
       {/* Overlay para cerrar sidebar en móvil */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden top-16"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - DEBAJO del navbar */}
       <aside
-        className={`fixed left-0 top-16 h-full bg-white shadow-lg transition-transform duration-300 z-20 ${
+        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-lg transition-transform duration-300 z-20 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 w-64`}
+        } lg:translate-x-0 w-64 overflow-y-auto`}
       >
         <nav className="mt-8">
           {menuItems.map((item) => (
@@ -114,9 +114,9 @@ const menuItems = [
         </nav>
       </aside>
 
-      {/* Contenido principal */}
+      {/* Contenido principal - CON ESPACIO SUPERIOR */}
       <main
-        className={`transition-all duration-300 pt-20 p-4 sm:p-6 lg:p-8 lg:ml-64`}
+        className={`transition-all duration-300 min-h-screen pt-24 p-4 sm:p-6 lg:p-8 lg:ml-64`}
       >
         {children}
       </main>

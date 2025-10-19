@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard'
 import Products from './pages/Products'
 import Sales from './pages/Sales'
 import Cashier from './pages/Cashier'
+import Reports from './pages/Reports'
+import Customers from './pages/Customers'
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -62,6 +64,32 @@ function App() {
           isAuthenticated ? (
             <Layout>
               <Cashier />
+            </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        } 
+      />
+
+      <Route 
+        path="/customers" 
+        element={
+          isAuthenticated ? (
+            <Layout>
+              <Customers />
+            </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        } 
+      />
+
+      <Route 
+        path="/reports" 
+        element={
+          isAuthenticated ? (
+            <Layout>
+              <Reports />
             </Layout>
           ) : (
             <Navigate to="/login" />

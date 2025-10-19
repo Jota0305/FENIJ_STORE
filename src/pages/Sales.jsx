@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useProducts } from '../context/ProductContext';
 import { useSales } from '../context/SalesContext';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingCart, Plus, Minus, Trash2, Search, Ticket } from 'lucide-react';
+import { useCustomers } from '../context/CustomerContext';
+import { ShoppingCart, Plus, Minus, Trash2, Search, Ticket, User, UserPlus } from 'lucide-react';
 
 function Sales() {
   const { products } = useProducts();
   const { createTicket } = useSales();
   const { user } = useAuth();
+  const { customers, searchCustomers, updateCustomerStats } = useCustomers();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [cart, setCart] = useState([]);
@@ -15,6 +17,11 @@ function Sales() {
   const [selectedSize, setSelectedSize] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [generatedTicket, setGeneratedTicket] = useState(null);
+  
+  // Estados para manejo de clientes
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showCustomerSearch, setShowCustomerSearch] = useState(false);
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
 
   // Filtrar productos con stock disponible
   const availableProducts = products.filter(product => {
@@ -25,6 +32,11 @@ function Sales() {
       product.sku.toLowerCase().includes(searchTerm.toLowerCase());
     return hasStock && matchesSearch;
   });
+
+  // Filtrar clientes
+  const filteredCustomers = customerSearchTerm 
+    ? searchCustomers(customerSearchTerm) 
+    : customers.slice(0, 5); // Mostrar solo los primeros 5 si no hay búsqueda
 
   // Seleccionar producto para agregar al carrito
   const handleSelectProduct = (product) => {
@@ -42,20 +54,17 @@ function Sales() {
       return;
     }
 
-    // Verificar si ya existe en el carrito
     const existingItemIndex = cart.findIndex(
       item => item.productId === selectedProduct.id && item.size === selectedSize
     );
 
     if (existingItemIndex >= 0) {
-      // Incrementar cantidad si ya existe
       const updatedCart = [...cart];
       updatedCart[existingItemIndex].quantity += 1;
       updatedCart[existingItemIndex].subtotal = 
         updatedCart[existingItemIndex].quantity * updatedCart[existingItemIndex].price;
       setCart(updatedCart);
     } else {
-      // Agregar nuevo item
       const newItem = {
         productId: selectedProduct.id,
         sku: selectedProduct.sku,
@@ -70,7 +79,6 @@ function Sales() {
       setCart([...cart, newItem]);
     }
 
-    // Limpiar selección
     setSelectedProduct(null);
     setSelectedSize('');
   };
@@ -102,6 +110,18 @@ function Sales() {
     return cart.reduce((sum, item) => sum + item.subtotal, 0);
   };
 
+  // Seleccionar cliente
+  const handleSelectCustomer = (customer) => {
+    setSelectedCustomer(customer);
+    setShowCustomerSearch(false);
+    setCustomerSearchTerm('');
+  };
+
+  // Remover cliente seleccionado
+  const handleRemoveCustomer = () => {
+    setSelectedCustomer(null);
+  };
+
   // Generar ticket
   const handleGenerateTicket = () => {
     if (cart.length === 0) {
@@ -109,10 +129,17 @@ function Sales() {
       return;
     }
 
-    const ticket = createTicket(cart, user.username);
+    const ticket = createTicket(cart, user.username, selectedCustomer?.id || null);
+    
+    // Si hay cliente seleccionado, actualizar sus estadísticas
+    if (selectedCustomer) {
+      updateCustomerStats(selectedCustomer.id, getTotal());
+    }
+    
     setGeneratedTicket(ticket);
     setShowSuccessModal(true);
     setCart([]);
+    setSelectedCustomer(null);
   };
 
   return (
@@ -218,6 +245,40 @@ function Sales() {
               <h2 className="text-lg font-semibold text-gray-800">Carrito</h2>
             </div>
 
+            {/* Sección de cliente */}
+            <div className="mb-4 pb-4 border-b">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Cliente</h3>
+              {selectedCustomer ? (
+                <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <div className="h-8 w-8 bg-blue-200 rounded-full flex items-center justify-center">
+                      <span className="text-blue-700 font-semibold text-sm">
+                        {selectedCustomer.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">{selectedCustomer.name}</p>
+                      <p className="text-xs text-gray-600">{selectedCustomer.phone}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleRemoveCustomer}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowCustomerSearch(true)}
+                  className="w-full flex items-center justify-center space-x-2 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                >
+                  <UserPlus size={18} />
+                  <span className="text-sm">Agregar Cliente (Opcional)</span>
+                </button>
+              )}
+            </div>
+
             {cart.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <ShoppingCart className="mx-auto mb-2 text-gray-300" size={48} />
@@ -290,6 +351,66 @@ function Sales() {
         </div>
       </div>
 
+      {/* Modal de búsqueda de clientes */}
+      {showCustomerSearch && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-800">Seleccionar Cliente</h3>
+              <button
+                onClick={() => {
+                  setShowCustomerSearch(false);
+                  setCustomerSearchTerm('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <Trash2 size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4">
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Buscar cliente..."
+                  value={customerSearchTerm}
+                  onChange={(e) => setCustomerSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoFocus
+                />
+              </div>
+
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {filteredCustomers.length === 0 ? (
+                  <p className="text-center text-gray-500 py-4">No se encontraron clientes</p>
+                ) : (
+                  filteredCustomers.map((customer) => (
+                    <button
+                      key={customer.id}
+                      onClick={() => handleSelectCustomer(customer)}
+                      className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-blue-600 font-semibold">
+                            {customer.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-800">{customer.name}</p>
+                          <p className="text-xs text-gray-600">{customer.phone}</p>
+                        </div>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de éxito */}
       {showSuccessModal && generatedTicket && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -308,6 +429,11 @@ function Sales() {
                 <p className="text-sm text-gray-600">
                   Total: <span className="font-bold">S/ {generatedTicket.total.toFixed(2)}</span>
                 </p>
+                {generatedTicket.customerId && selectedCustomer && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Cliente: {selectedCustomer.name}
+                  </p>
+                )}
                 <p className="text-xs text-gray-500 mt-2">
                   El cliente debe ir a caja para realizar el pago
                 </p>
