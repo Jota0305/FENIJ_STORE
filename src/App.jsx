@@ -4,19 +4,19 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Products from './pages/Products'
+import Sales from './pages/Sales'
+import Cashier from './pages/Cashier'
 
 function App() {
   const { isAuthenticated } = useAuth();
 
   return (
     <Routes>
-      {/* Ruta de Login (sin Layout) */}
       <Route 
         path="/login" 
         element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 
       />
       
-      {/* Rutas protegidas (con Layout) */}
       <Route 
         path="/dashboard" 
         element={
@@ -42,8 +42,33 @@ function App() {
           )
         } 
       />
+
+      <Route 
+        path="/sales" 
+        element={
+          isAuthenticated ? (
+            <Layout>
+              <Sales />
+            </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        } 
+      />
+
+      <Route 
+        path="/cashier" 
+        element={
+          isAuthenticated ? (
+            <Layout>
+              <Cashier />
+            </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        } 
+      />
       
-      {/* Ruta por defecto */}
       <Route 
         path="*" 
         element={<Navigate to="/login" />} 

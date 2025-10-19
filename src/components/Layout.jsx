@@ -10,7 +10,8 @@ import {
   Menu, 
   X,
   Home,
-  User
+  User,
+  DollarSign
 } from 'lucide-react';
 
 function Layout({ children }) {
@@ -31,13 +32,14 @@ function Layout({ children }) {
   };
 
   // Enlaces del menú
-  const menuItems = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/products', icon: Package, label: 'Productos' },
-    { path: '/sales', icon: ShoppingCart, label: 'Ventas' },
-    { path: '/reports', icon: BarChart3, label: 'Reportes' }
-  ];
-
+// Enlaces del menú
+const menuItems = [
+  { path: '/dashboard', icon: Home, label: 'Dashboard' },
+  { path: '/products', icon: Package, label: 'Productos' },
+  { path: '/sales', icon: ShoppingCart, label: 'Ventas' },
+  { path: '/cashier', icon: DollarSign, label: 'Caja' },
+  { path: '/reports', icon: BarChart3, label: 'Reportes' }
+];
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Navbar superior */}

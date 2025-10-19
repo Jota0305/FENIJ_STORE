@@ -1,7 +1,9 @@
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
@@ -40,10 +42,16 @@ function Dashboard() {
       <div className="bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Acciones Rápidas</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button className="bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium">
+          <button 
+            onClick={() => navigate('/sales')}
+            className="bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+          >
             Nueva Venta
           </button>
-          <button className="bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors font-medium">
+          <button 
+            onClick={() => navigate('/products')}
+            className="bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition-colors font-medium"
+          >
             Agregar Producto
           </button>
         </div>
