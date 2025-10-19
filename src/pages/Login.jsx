@@ -34,13 +34,13 @@ function Login() {
     <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
 
-        <div className="text-center p-16 -mt-8">
+        <div className="text-center p-2">
           <img 
             src="/FENIJ LOGO.png" 
             alt="FENIJ STORE Logo" 
             className="w-25 h-25 mx-auto "
           />
-          <h1 className="text-2xl font-bold text-gray-800 ">Sistema de Ventas</h1>
+
         </div>
 
 
